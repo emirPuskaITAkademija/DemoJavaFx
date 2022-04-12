@@ -1,7 +1,7 @@
 package com.academy.demojavafx.confirmation;
 
-import javafx.beans.property.IntegerProperty;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,15 +14,16 @@ import javafx.stage.Stage;
 
 public class ConfirmationWindow {
 
-    private String title;
-    private String message;
+    private final String title;
+    private final String message;
+    private boolean confirmation = false;
 
     public ConfirmationWindow(String title, String message) {
         this.title = title;
         this.message = message;
     }
 
-    public void show(){
+    public void show(EventHandler<ActionEvent> yesListener) {
         //kreiram kompletan novi prozor
         Stage stage = new Stage();
         //blokiraj sve druge prozore i evente koji se mogu desit na njima
@@ -32,10 +33,15 @@ public class ConfirmationWindow {
 
         Label messageLabel = new Label();
         messageLabel.setText(message);
+        final boolean condition = false;
         Button yesButton = new Button("YES");
-        yesButton.setOnAction(this::handleYes);
+        yesButton.setOnAction(e -> {
+            yesListener.handle(e);
+            stage.close();
+        });
         Button noButton = new Button("NO");
-        noButton.setOnAction(e->stage.close());
+        NoListener noListener = new NoListener(stage);
+        noButton.setOnAction(noListener);
 
         VBox container = new VBox(20);
         container.setPadding(new Insets(20));
@@ -46,7 +52,6 @@ public class ConfirmationWindow {
         buttonBox.setAlignment(Pos.CENTER);
 
 
-
         container.getChildren().addAll(messageLabel, buttonBox);
 
         Scene scene = new Scene(container);
@@ -54,7 +59,17 @@ public class ConfirmationWindow {
         stage.show();
     }
 
-    private void handleYes(ActionEvent e){
-        System.out.println("Odoše pare s računa...");
+    private class NoListener implements EventHandler<ActionEvent> {
+
+        private Stage stage;
+
+        public NoListener(Stage stage) {
+            this.stage = stage;
+        }
+
+        @Override
+        public void handle(ActionEvent event) {
+            this.stage.close();
+        }
     }
 }
